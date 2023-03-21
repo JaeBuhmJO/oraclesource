@@ -102,7 +102,7 @@ SELECT
 FROM
     employees
 WHERE
-        hire_date like '04%'
+    hire_date LIKE '04%'
 ORDER BY
     hire_date;
 
@@ -118,39 +118,148 @@ ORDER BY
     
     --부서가 20, 50이고 연봉이 5000에서 12000범위인 사람들의 LAST_NAME, SALARY 조회
     -- 연봉 오름차순 정렬
-    
-    SELECT LAST_NAME, SALARY
-    FROM EMPLOYEES
-    WHERE DEPARTMENT_ID IN (20,50) AND SALARY BETWEEN 5000 AND 12000
-    ORDER BY SALARY;
-    
-SELECT EMPLOYEE_ID, LAST_NAME
-FROM EMPLOYEES
-WHERE LAST_NAME LIKE '%u%';
 
-SELECT EMPLOYEE_ID, LAST_NAME
-FROM EMPLOYEES
-WHERE LAST_NAME LIKE '___a%';
+SELECT
+    last_name,
+    salary
+FROM
+    employees
+WHERE
+    department_id IN ( 20, 50 )
+    AND salary BETWEEN 5000 AND 12000
+ORDER BY
+    salary;
 
-SELECT EMPLOYEE_ID, LAST_NAME
-FROM EMPLOYEES
-WHERE LAST_NAME LIKE '___a%' OR LAST_NAME LIKE '___e%'
-ORDER BY LAST_NAME;
+SELECT
+    employee_id,
+    last_name
+FROM
+    employees
+WHERE
+    last_name LIKE '%u%';
 
-SELECT EMPLOYEE_ID, LAST_NAME
-FROM EMPLOYEES
-WHERE LAST_NAME LIKE '%a%' AND LAST_NAME LIKE '%e%'
-ORDER BY LAST_NAME;
+SELECT
+    employee_id,
+    last_name
+FROM
+    employees
+WHERE
+    last_name LIKE '___a%';
 
-select LAST_NAME, JOB_ID
-FROM EMPLOYEES
-WHERE MANAGER_ID IS NULL OR MANAGER_ID = '';
+SELECT
+    employee_id,
+    last_name
+FROM
+    employees
+WHERE
+    last_name LIKE '___a%'
+    OR last_name LIKE '___e%'
+ORDER BY
+    last_name;
 
-SELECT DISTINCT DEPARTMENT_ID
-FROM EMPLOYEES
-WHERE JOB_ID = 'ST_CLERK' AND DEPARTMENT_ID IS NOT NULL;
+SELECT
+    employee_id,
+    last_name
+FROM
+    employees
+WHERE
+    last_name LIKE '%a%'
+    AND last_name LIKE '%e%'
+ORDER BY
+    last_name;
 
-SELECT EMPLOYEE_ID, FIRST_NAME, JOB_ID, SALARY * COMMISSION_PCT COMMISSION
-FROM EMPLOYEES
-WHERE COMMISSION_PCT IS NOT NULL;
+SELECT
+    last_name,
+    job_id
+FROM
+    employees
+WHERE
+    manager_id IS NULL
+    OR manager_id = '';
 
+SELECT DISTINCT
+    department_id
+FROM
+    employees
+WHERE
+        job_id = 'ST_CLERK'
+    AND department_id IS NOT NULL;
+
+SELECT
+    employee_id,
+    first_name,
+    job_id,
+    salary * commission_pct commission
+FROM
+    employees
+WHERE
+    commission_pct IS NOT NULL;
+
+SELECT
+    first_name,
+    last_name,
+    email,
+    phone_number,
+    lower(job_id)
+FROM
+    employees
+WHERE
+    first_name = 'Curtis';
+
+SELECT
+    employee_id,
+    first_name,
+    hire_date,
+    replace(job_id, 'IT_PROG', '프로그래머')
+FROM
+    employees
+WHERE
+    department_id IN ( 60, 70, 80, 90 );
+
+SELECT
+    employee_id,
+    first_name,
+    last_name,
+    department_id,
+    job_id,
+    first_name
+    || ' '
+    || last_name 사원명
+FROM
+    employees
+WHERE
+    job_id IN ( 'AD_PRES', 'PU_CLERK' );
+
+--
+SELECT
+    last_name,
+    salary,
+    CASE
+        WHEN salary < 2000  THEN
+            0
+        WHEN salary < 4000  THEN
+            0.09
+        WHEN salary < 6000  THEN
+            0.20
+        WHEN salary < 8000  THEN
+            0.30
+        WHEN salary < 10000 THEN
+            0.40
+        WHEN salary < 12000 THEN
+            0.42
+        WHEN salary < 14000 THEN
+            0.44
+        ELSE
+            0.45
+    END AS tax_rate
+FROM
+    employees   
+WHERE
+    department_id = 80;
+
+
+SELECT MAX(SALARY)-MIN(SALARY) AS RANGE
+FROM EMPLOYEES;
+
+SELECT COUNT(DISTINCT MANAGER_ID)
+FROM EMPLOYEES;
