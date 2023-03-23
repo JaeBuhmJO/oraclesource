@@ -1622,29 +1622,494 @@ WHERE
     
     --SELECT 절에 사용하는 서브쿼리(스칼라 서브쿼리)
     --SELECT 절에 사용하는 서브쿼리는 반드시 하나의 결과만 반환해야 함
-    SELECT EMPNO, ENAME, JOB, SAL,
-    (SELECT GRADE FROM SALGRADE WHERE E.SAL BETWEEN LOSAL AND HISAL) AS SALGRADE,
-    DEPTNO, 
-    (SELECT DNAME FROM DEPT WHERE E.DEPTNO = DEPT.DEPTNO) AS DNAME
-    FROM EMP E;
+SELECT
+    empno,
+    ename,
+    job,
+    sal,
+    (
+        SELECT
+            grade
+        FROM
+            salgrade
+        WHERE
+            e.sal BETWEEN losal AND hisal
+    ) AS salgrade,
+    deptno,
+    (
+        SELECT
+            dname
+        FROM
+            dept
+        WHERE
+            e.deptno = dept.deptno
+    ) AS dname
+FROM
+    emp e;
     
     --실습1
-    SELECT EMPNO, ENAME, JOB, E.DEPTNO, D.DNAME, D.LOC
-    FROM EMP E JOIN DEPT D ON E.DEPTNO=D.DEPTNO
-    WHERE E.DEPTNO = 10 AND JOB NOT IN (SELECT JOB FROM EMP WHERE DEPTNO=30);
+SELECT
+    empno,
+    ename,
+    job,
+    e.deptno,
+    d.dname,
+    d.loc
+FROM
+         emp e
+    JOIN dept d ON e.deptno = d.deptno
+WHERE
+        e.deptno = 10
+    AND job NOT IN (
+        SELECT
+            job
+        FROM
+            emp
+        WHERE
+            deptno = 30
+    );
     
     --실습2
-    SELECT E.*, S.GRADE
-    FROM EMP E JOIN SALGRADE S ON E.SAL BETWEEN S.LOSAL AND S.HISAL
-    WHERE SAL>(SELECT MAX(SAL) FROM EMP WHERE UPPER(JOB) = 'SALESMAN')
-    ORDER BY EMPNO;
+SELECT
+    e.*,
+    s.grade
+FROM
+         emp e
+    JOIN salgrade s ON e.sal BETWEEN s.losal AND s.hisal
+WHERE
+    sal > (
+        SELECT
+            MAX(sal)
+        FROM
+            emp
+        WHERE
+            upper(job) = 'SALESMAN'
+    )
+ORDER BY
+    empno;
+
+SELECT
+    e.*,
+    (
+        SELECT
+            grade
+        FROM
+            salgrade
+        WHERE
+            e.sal BETWEEN losal AND hisal
+    ) AS salgrade
+FROM
+    emp e
+WHERE
+    sal > (
+        SELECT
+            MAX(sal)
+        FROM
+            emp
+        WHERE
+            upper(job) = 'SALESMAN'
+    )
+ORDER BY
+    empno;
+
+SELECT
+    e.*,
+    s.grade
+FROM
+         emp e
+    JOIN salgrade s ON e.sal BETWEEN s.losal AND s.hisal
+WHERE
+    sal > ALL (
+        SELECT
+            sal
+        FROM
+            emp
+        WHERE
+            upper(job) = 'SALESMAN'
+    )
+ORDER BY
+    empno;
     
-    SELECT E.*, (SELECT GRADE FROM SALGRADE WHERE E.SAL BETWEEN LOSAL AND HISAL) AS SALGRADE
-    FROM EMP E
-    WHERE SAL>(SELECT MAX(SAL) FROM EMP WHERE UPPER(JOB) = 'SALESMAN')
-    ORDER BY EMPNO;
-    
-        SELECT E.*, S.GRADE
-    FROM EMP E JOIN SALGRADE S ON E.SAL BETWEEN S.LOSAL AND S.HISAL
-    WHERE SAL>ALL(SELECT SAL FROM EMP WHERE UPPER(JOB) = 'SALESMAN')
-    ORDER BY EMPNO;
+        -- *DML(DATA MANIPULATION LANGUAGE) : 데이터 INSERT, UPDATE, DELETE, 하는 조작어
+        --COMMIT : DML 작업을 데이터베이스에 최종 반영
+        --ROLLBACK : DML 작업을 취소
+        --SELECT+DML : 자주 사용되는 SQL
+        
+        --연습용 테이블 생성
+CREATE TABLE dept_temp
+    AS
+        SELECT
+            *
+        FROM
+            dept;
+
+DROP TABLE dept_temp;
+        
+        -- 열 이름은 선택사항임
+        -- INSERT INTO 테이블이름(열이름1, 열이름2, ...)
+        -- VALUES(데이터1, 데이터2, ...)
+        
+        -- DEPT_TEMP 새로운 부서 추가하기
+INSERT INTO dept_temp (
+    deptno,
+    dname,
+    loc
+) VALUES (
+    50,
+    'DATABASE',
+    'SEOUL'
+);
+        
+        --열 이름 제거할 때
+INSERT INTO dept_temp VALUES (
+    60,
+    'NETWORK',
+    'BUSAN'
+);
+        
+        --INSERT시 오류들
+        --이 열에 대해 지정된 전체 자릿수보다 큰 값이 허용됩니다.
+--        INSERT INTO dept_temp
+--        VALUES(600,'NETWORK','BUSAN');
+
+        --이정도는 자동으로 변환해서 반영해준다
+INSERT INTO dept_temp VALUES (
+    '60',
+    'NETWORK',
+    'BUSAN'
+);
+        
+        --값의 수가 충분하지 않습니다
+--        INSERT INTO dept_temp(DEPTNO, DNAME, LOC)
+--        VALUES(70, 'DATABASE')
+        
+        --NULL을 삽입하는 방법
+INSERT INTO dept_temp (
+    deptno,
+    dname,
+    loc
+) VALUES (
+    80,
+    'WEB',
+    NULL
+);
+
+INSERT INTO dept_temp (
+    deptno,
+    dname,
+    loc
+) VALUES (
+    90,
+    'MOBILE',
+    ''
+);      
+        --NULL 삽입할 컬럼명을 지정하지 않았음
+        --삽입시 전체 컬럼을 삽입하지 않는다면 필드명 기입 필수
+INSERT INTO dept_temp (
+    deptno,
+    dname
+) VALUES (
+    91,
+    'INCHEON'
+);
+        
+        -EMP_TEMP 생성(EMP 테이블만 복사 - 데이터는 복사를 하지 않을 때)
+CREATE TABLE emp_temp
+    AS
+        SELECT
+            *
+        FROM
+            emp
+        WHERE
+            100 <> 100;
+
+DROP TABLE emp_temp;
+
+INSERT INTO emp_temp (
+    empno,
+    ename,
+    job,
+    mgr,
+    hiredate,
+    sal,
+    comm,
+    deptno
+) VALUES (
+    9999,
+    '홍길동',
+    'PRESIDENT',
+    NULL,
+    '2001/01/01',
+    5000,
+    1000,
+    10
+);
+
+INSERT INTO emp_temp (
+    empno,
+    ename,
+    job,
+    mgr,
+    hiredate,
+    sal,
+    comm,
+    deptno
+) VALUES (
+    1111,
+    '성춘향',
+    'MANAGER',
+    9999,
+    '2002-01/05',
+    4000,
+    NULL,
+    20
+);
+        
+        --날짜 입력 시 년/월/일 순서 => 일/월/년 삽입 => 그냥하면 오류
+--        INSERT INTO EMP_TEMP(EMPNO, ENAME, JOB, MGR, HIREDATE, SAL, COMM, DEPTNO)
+--        VALUES(2222,'이순신','MANAGER',9999,'07/01/2001',4000,NULL,20);
+
+INSERT INTO emp_temp (
+    empno,
+    ename,
+    job,
+    mgr,
+    hiredate,
+    sal,
+    comm,
+    deptno
+) VALUES (
+    2222,
+    '이순신',
+    'MANAGER',
+    9999,
+    TO_DATE('07/01/2001', 'DD/MM/YYYY'),
+    4000,
+    NULL,
+    20
+);
+
+INSERT INTO emp_temp (
+    empno,
+    ename,
+    job,
+    mgr,
+    hiredate,
+    sal,
+    comm,
+    deptno
+) VALUES (
+    3333,
+    '심봉사',
+    'MANAGER',
+    9999,
+    sysdate,
+    4000,
+    NULL,
+    30
+);
+        
+        --서브쿼리로 INSERT 구현
+        --EMP, SALGRADE 테이블을 JOIN 후 급여 등급이 1인 사원만 EMP_TEMP 에 추가
+
+INSERT INTO emp_temp (
+    empno,
+    ename,
+    job,
+    mgr,
+    hiredate,
+    sal,
+    comm,
+    deptno
+)
+    SELECT
+        empno,
+        ename,
+        job,
+        mgr,
+        hiredate,
+        sal,
+        comm,
+        deptno
+    FROM
+             emp
+        JOIN salgrade ON sal BETWEEN losal AND hisal
+    WHERE
+        grade = 1;
+
+SELECT
+    *
+FROM
+    emp_temp;
+
+COMMIT;
+        
+        --UPDATE : 테이블에 있는 데이터 수정
+        
+--        UPDATE 테이블명
+--        SET 변경할열이름 = 데이터, 변경할열이름 = 데이터..
+--        WHERE 변경을 위한 대상 행을 선별하기 위한 조건
+
+SELECT
+    *
+FROM
+    dept_temp;
+
+-- DEPT_TEMP LOC 열의 모든 값을 SEOUL로 변경
+
+UPDATE dept_temp
+SET
+    loc = 'SEOUL';
+
+ROLLBACK;
+
+--데이터 일부분 수정은 WHERE 사용
+UPDATE dept_temp
+SET
+    loc = 'SEOUL'
+WHERE
+    deptno = 40;
+
+UPDATE dept_temp
+SET
+    dname = 'SALES',
+    loc = 'CHICAGO'
+WHERE
+    deptno = 80;
+
+--EMP_TEMP 사원들 중에서 급여가 2500이하인 사원만 추가수당을 50으로
+
+UPDATE emp_temp
+SET
+    comm = 50
+WHERE
+    sal < 2500;
+
+SELECT
+    *
+FROM
+    emp_temp;
+
+--UPDATE에서도 서브쿼리 사용 가능
+UPDATE dept_temp
+SET
+    ( dname,
+      loc ) = (
+        SELECT
+            dname,
+            loc
+        FROM
+            dept
+        WHERE
+            deptno = 40
+    )
+WHERE
+    deptno = 40;
+
+SELECT
+    *
+FROM
+    dept_temp;
+
+COMMIT;
+
+        --DELETE : 테이블에 있는 데이터 삭제
+        --DELETE 테이블명
+        --FROM (선택) 
+        --WHERE 삭제 데이터를 선별하기 위한 조건식
+
+CREATE TABLE emp_temp2
+    AS
+        SELECT
+            *
+        FROM
+            emp;
+
+--JOB이 MANAGER인 사원 삭제
+
+DELETE FROM EMP_TEMP2 WHERE JOB='MANAGER';
+
+SELECT * FROM EMP_TEMP2;
+
+DELETE EMP_TEMP2 WHERE JOB='SALESMAN';
+
+--전체 데이터 삭제
+
+DELETE EMP_TEMP2;
+
+DELETE EMP_TEMP2 
+WHERE EMPNO IN (SELECT EMPNO 
+                FROM EMP JOIN SALGRADE ON SAL BETWEEN LOSAL AND HISAL AND GRADE=3 AND DEPTNO=30);
+                
+                COMMIT;
+
+
+CREATE TABLE EXAM_EMP AS SELECT * FROM EMP;
+CREATE TABLE EXAM_DEPT AS SELECT * FROM DEPT;
+CREATE TABLE EXAM_SALGRADE AS SELECT * FROM SALGRADE;
+
+INSERT INTO EXAM_EMP (EMPNO, ENAME, JOB, MGR, HIREDATE,SAL,COMM,DEPTNO)
+VALUES
+(7201,'TEST_USER1','MANAGER',7788,'2016-01-02',4500,NULL,50),
+(7202,'TEST_USER2','CLERK',7201,'2016-02-21',1800,NULL,50),
+(7203,'TEST_USER3','ANALYST',7201,'2016-04-11',3400,NULL,60),
+(7204,'TEST_USER4','SALESMAN',7201,'2016-05-31',2700,300,60),
+(7205,'TEST_USER5','CLERK',7201,'2016-07-20',2600,NULL,70),
+(7206,'TEST_USER6','CLERK',7201,'2016-09-08',2600,NULL,70),
+(7207,'TEST_USER7','LECTURER',7201,'2016-10-28',2300,NULL,80),
+(7208,'TEST_USER8','STUDENT',7201,'2018-03-09',1200,NULL,80);
+
+SELECT * FROM EXAM_EMP;
+
+DELETE EXAM_EMP WHERE ENAME LIKE '%6';
+
+--EXAM_EXP 사원 중 50번 부서에서 근무하는 사원 평균 급여보다 많이 받는 사원들 70번 부서로  이동
+UPDATE EXAM_EMP
+SET DEPTNO=70
+WHERE SAL>(SELECT AVG(SAL) FROM EXAM_EMP WHERE DEPTNO=50);
+
+--EXAM_EMP 사원 중 60번 부서의 사원중 가장 입사일 빠른 사원보다 늦게 입사한 사원 급여 10% 인상
+--80번 부서로 이동
+UPDATE EXAM_EMP
+SET SAL=SAL*1.1, DEPTNO=80
+WHERE HIREDATE>(SELECT MIN(HIREDATE) FROM EXAM_EMP WHERE DEPTNO=60);
+
+SELECT * FROM EXAM_EMP;
+
+--EXAM_EMP 사원 중 급여등급 5등급 삭제
+DELETE EXAM_EMP
+WHERE EMPNO IN (SELECT EMPNO FROM EXAM_EMP JOIN EXAM_SALGRADE ON SAL BETWEEN LOSAL AND HISAL AND GRADE = 5);
+
+
+--트랜잭션(transaction) : 최소  수행 단위
+--트랜잭션 제어하는 구문 TCL(Transaction Control Language) : COMMIT, ROLLBACK
+
+CREATE TABLE DEPT_TCL AS SELECT * FROM DEPT;
+
+INSERT INTO DEPT_TCL VALUES(50, 'DATABASE', 'SEOUL');
+
+UPDATE DEPT_TCL SET LOC='BUSAN' WHERE DEPTNO=40;
+
+DELETE FROM DEPT_TCL WHERE DNAME = 'RESEARCH';
+
+SELECT * FROM DEPT_TCL;
+
+--트랜잭션 취소
+ROLLBACK;
+
+--트랜잭션 최종 반영
+COMMIT;
+
+
+--세션 : 어떤 활동을 위한 시간이나 기간
+--데이터베이스 세션 : 데이터베이스 접속을 시작으로 관련작업 수행한 후 접속 종료까지
+
+DELETE FROM DEPT_TCL WHERE DEPTNO=50;
+COMMIT;
+
+UPDATE DEPT_TCL SET LOC='SEOUL' WHERE DEPTNO=30;
+COMMIT;
+
+select * from dept_temp;
+
+DELETE FROM DEPT_TEMP WHERE DEPTNO=55;
