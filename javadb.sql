@@ -11,6 +11,27 @@ ADDR VARCHAR2(50),
 MOBILE VARCHAR2(13)
 );
 
+--select(+서브쿼리, 조인) + DML(insert, delete, update)
+
+select * from usertbl;
+
+delete usertbl where addr='옆집';
+commit;
+
+select * from usertbl where no=1;
+select * from usertbl where username='홍길동';
+
+-- like : _ or %
+select * from usertbl where username like '홍%동%';
+
+--insert into 테이블명(필드명1, 필드명2,...)
+--values();
+
+--update 테이블명
+--set 업데이트할필드명=값, 업데이트할필드명=값, ...
+--where 조건;
+
+--delete 테이블명 where 조건
 
 
 -- 시퀀스 생성
@@ -98,3 +119,25 @@ FROM SORDER O, SUSER U, PAYTYPE P, PRODUCT PR
 WHERE O.USER_ID = U.USER_ID AND U.PAY_NO = P.PAY_NO AND O.PRODUCT_ID = PR.PRODUCT_ID AND O.USER_ID=1000
 order by pr.price desc;
 
+--도서 테이블
+-- code, title, writer, price
+-- code : 1001
+-- title : '자바의 신'
+-- writer : '홍길동'
+-- price : 250000
+
+create table bookTBL(
+code number(4) primary key,
+title nvarchar2(50) not null,
+writer nvarchar2(20) not null,
+price number(8) not null);
+
+INSERT INTO BOOKTBL(CODE, TITLE, WRITER, PRICE)VALUES (1001,'이것이 자바다','신용균',25000);
+INSERT INTO BOOKTBL(CODE, TITLE, WRITER, PRICE)VALUES (1002,'자바의 신','강신용',28000);
+INSERT INTO BOOKTBL(CODE, TITLE, WRITER, PRICE)VALUES (1003,'오라클로 배우는 데이터베이스','이지훈',28000);
+INSERT INTO BOOKTBL(CODE, TITLE, WRITER, PRICE)VALUES (1004,'자바 1000제','김용만',29000);
+INSERT INTO BOOKTBL(CODE, TITLE, WRITER, PRICE)VALUES (1005,'자바 프로그래밍 입문','박은종',30000);
+COMMIT;
+
+desc booktbl;
+alter table booktbl add description nvarchar2(100);
