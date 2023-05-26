@@ -295,8 +295,62 @@ SELECT ROWNUM, BNO, TITLE, RE_REF, RE_LEV, RE_SEQ
   CREATE TABLE TBL_SAMPLE1(COL1 VARCHAR2(500));
   CREATE TABLE TBL_SAMPLE2(COL1 VARCHAR2(50));
   
-  select * from tbl_sample1;
-  select * from tbl_sample2;
+  select *
+  from (select rownum rn, bno, title, writer 
+    from (select bno, title, writer from spring_board order by bno desc)
+    where rownum <= 20)
+  where rn>0;
   
-  delete tbl_sample1;
+  -- 오라클 힌트 사용
+  select bno, title, writer, regdate, updatedate 
+  from (select /*+INDEX_DESC(spring_board pk_spring_board)*/ rownum rn, bno, title, writer, regdate, updatedate 
+        from spring_board where rownum <= 20)
+  where rn>0;
+    
   commit;
+  
+  -- 페이지 나누기 (get방식)
+  -- rownum : 조회된 결과에 번호를 매겨줌
+  -- spring_board : bno가 pk. order by 기준도 bno
+  -- 1page : 가장 최신글 20개
+  -- 2page : 그 다음 최신글 20개
+  
+  insert into spring_board(bno, title, content, writer)
+  (select seq_board.nextval, title, content, writer from spring_board);
+  
+  -- 댓글 테이블
+  
+  create table spring_reply(
+    rno number(10,0) constraint pk_reply primary key,
+    bno number(10,0) not null,
+    reply varchar2(1000) not null,
+    replyer varchar2(50) not null,
+    replydate date default sysdate,
+    constraint fk_reply_board foreign key(bno) references spring_board(bno)
+    );
+    
+    alter table spring_reply add updatedate date default sysdate;
+    desc spring_reply;
+    select * from spring_reply order by rno desc;
+    
+    create sequence seq_reply;
+    
+ -- spring_reply 인덱스 추가 설정
+    create index idx_reply on spring_reply(bno desc, rno asc);
+    
+      select rno, bno, reply, replyer, replydate, updatedate
+          from (select /*+INDEX(spring_reply idx_reply)*/ rownum rn, rno, bno, reply, replyer, replydate, updatedate
+          from spring_reply
+          where bno=1838 and rownum <= 10)
+      where rn>0;
+      
+ -- spring_board에 컬럼 추가(댓글 수 저장)
+ alter table spring_board add replycnt number default 0;
+ 
+ -- 이미 들어간 댓글 수를 삽입
+ 
+ update spring_board
+ set replycnt = (select count(rno) from spring_reply where spring_board.bno = spring_reply.bno);
+ commit;
+ 
+ 
